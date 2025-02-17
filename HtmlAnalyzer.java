@@ -81,7 +81,7 @@ public class HtmlAnalyzer {
                             current = processOpeningTag(cleanedLine, htmlStack, current);
                         }
                         else {
-                            current.text = cleanedLine;
+                            current.text = currentLine;
                         }
                     }
                 }
