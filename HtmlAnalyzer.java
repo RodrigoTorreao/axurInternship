@@ -51,7 +51,7 @@ public class HtmlAnalyzer {
 
     private static class HtmlParser{
         private TreeNode root;
-        private String deepsetText = null;
+        private String deepestText = null;
 
         public HtmlParser(String html){
            parseHtml(html);
@@ -63,7 +63,7 @@ public class HtmlAnalyzer {
                 //Responsible for verifying malformed HTML
                 Stack<String> htmlStack = new Stack<String>();
 
-                //Responsible for finding deepsest text
+                //Responsible for finding deepest text
                 root = new TreeNode("root", -1);
 
                 TreeNode current = root;
@@ -84,6 +84,9 @@ public class HtmlAnalyzer {
                             current.text = cleanedLine;
                         }
                     }
+                }
+                if (!htmlStack.isEmpty()) {
+                    throw new RuntimeException("malformed HTML");
                 }
             }
             catch (Exception e) {
@@ -108,26 +111,36 @@ public class HtmlAnalyzer {
         }
 
         public String getDeepestText() {
-            if (deepsetText != null) return deepsetText;
             if (root == null) return null;
-
-            TreeNode[] deepest = new TreeNode[1];
-            findDeepestText(root, 0, deepest);
-
-            return deepest[0] != null ? deepest[0].text : null;
+            if(deepestText == null) {
+                deepestText = findDeepestText();
+            }
+            return deepestText;
         }
 
-        // Recursive Depth-First Search
-        private void findDeepestText(TreeNode node, int depth, TreeNode[] deepest) {
-            if (node == null) return;
+        private String findDeepestText() {
+            if (root == null) return null;
 
-            if (node.text != null && (deepest[0] == null || depth > deepest[0].depth)) {
-                deepest[0] = node;
+            String deepestText = null;
+            int maxDepth = -1;
+
+            Stack<TreeNode> stack = new Stack<>();
+            stack.push(root);
+
+            while (!stack.isEmpty()) {
+                TreeNode currentNode = stack.pop();
+
+                if (currentNode.text != null && currentNode.depth > maxDepth) {
+                    deepestText = currentNode.text;
+                    maxDepth = currentNode.depth;
+                }
+
+                for (int i = currentNode.children.size() - 1; i >= 0; i--) {
+                    stack.push(currentNode.children.get(i));
+                }
             }
 
-            for (TreeNode child : node.children) {
-                findDeepestText(child, depth + 1, deepest);
-            }
+            return deepestText;
         }
 
     }
